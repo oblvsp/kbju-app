@@ -1,6 +1,6 @@
 {
-  "version": "1.4",
-  "build": 6,
-  "notes": "Material You: цвета из обоев телефона, тёмная тема, новая иконка",
+  "version": "1.5",
+  "build": 7,
+  "notes": "Порции в ручном вводе, дневник в две строки, свайп-редактирование и удаление записей, увеличенный график недели, фикс мерцания переключателя",
   "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/main/kbju-index.html"
 }
