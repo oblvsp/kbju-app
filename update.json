@@ -1,6 +1,6 @@
 {
-  "version": "1.3",
-  "build": 5,
-  "notes": "первая публикация обновлений",
+  "version": "1.4",
+  "build": 6,
+  "notes": "Material You: цвета из обоев телефона, тёмная тема, новая иконка",
   "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/main/kbju-index.html"
 }
