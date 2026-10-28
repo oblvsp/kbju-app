@@ -49,6 +49,12 @@ cd kbju-app
 
 APK появится по пути `app/build/outputs/apk/debug/app-debug.apk`. Gradle Wrapper вместе с JAR-файлом уже включён в репозиторий.
 
+### Скачать готовый APK
+
+[Скачать текущую debug-сборку](kbju-app-native-debug.apk) · пакет `ru.labelcalc` · версия `1.0` (`versionCode 1`) · Android 8.0+.
+
+APK подписан debug-ключом и предназначен для установки и проверки. Это нативное приложение; оно устанавливается отдельно от старого HTML-контейнера `ru.local.kbju`.
+
 Запуск модульных тестов:
 
 ```bash
