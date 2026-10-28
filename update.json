@@ -1,6 +1,6 @@
 {
   "version": "1.5",
-  "build": 16,
-  "notes": "Сверка опубликованной версии: дневник по датам и центрированные записи",
-  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/64692b6fcc159fbc5a64b38417537f3a54ce6a92/kbju-index.html"
+  "build": 17,
+  "notes": "Дневник: дата ДД.ММ.ГГГГ, без счётчика записей",
+  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/bad8d4eaacc73715167a5c4d280b28097ca3790e/kbju-index.html"
 }
