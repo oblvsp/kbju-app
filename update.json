@@ -1,6 +1,6 @@
 {
   "version": "1.5",
-  "build": 17,
-  "notes": "Дневник: дата ДД.ММ.ГГГГ, без счётчика записей",
-  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/bad8d4eaacc73715167a5c4d280b28097ca3790e/kbju-index.html"
+  "build": 18,
+  "notes": "День недели и дата разнесены по краям; название блюда и граммовка выровнены по сторонам.",
+  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/83d3e94ddfd22e7e0acab7cac3590cec8ebea834/kbju-index.html"
 }
