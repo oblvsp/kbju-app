@@ -1,0 +1,6 @@
+{
+  "version": "1.5",
+  "build": 14,
+  "notes": "Обновления через GitHub API и загрузка сборки по SHA",
+  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/52ab37ae99b8126c4cf30e0772eef1f4b244df1e/kbju-index.html"
+}
