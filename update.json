@@ -1,6 +1,6 @@
 {
   "version": "1.5",
-  "build": 9,
-  "notes": "Убрана рамка при переключении вкладок внизу экрана",
+  "build": 10,
+  "notes": "полная пересборка — обновление продуктов и стилей",
   "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/main/kbju-index.html"
 }
