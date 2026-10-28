@@ -1,9 +1,11 @@
 __pycache__/
 *.pyc
 dist/
+github-update/
 build/
 target/
 .gradle/
+local.properties
 *.apk
 *.idsig
 *.keystore

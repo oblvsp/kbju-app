@@ -1,10 +1,13 @@
 import csv
 import json
+import os
+from pathlib import Path
 
 APP_VERSION = "1.5"
 APP_BUILD = 4
 DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/oblvsp/kbju-app/main/update.json"
-OUT_HTML = "calorie_app.html"
+ROOT = Path(__file__).resolve().parent
+OUT_HTML = ROOT / "calorie_app.html"
 
 TEMPLATE = r"""<!DOCTYPE html>
 <html lang="ru">
@@ -656,6 +659,11 @@ function hasBridge() {
   return typeof AppBridge !== 'undefined' && AppBridge && AppBridge.httpGet;
 }
 
+function updateUrl(url) {
+  var separator = url.indexOf('?') === -1 ? '?' : '&';
+  return url + separator + '_kbju_ts=' + Date.now();
+}
+
 function updStatus(msg) { $('upd_status').textContent = msg; }
 
 function syncUpdateUi() {
@@ -674,24 +682,33 @@ function doUpdate() {
   updStatus('Проверяю обновление…');
   setTimeout(function () {
     var resp;
-    try { resp = JSON.parse(AppBridge.httpGet(url)); } catch (e) { updStatus('Ошибка ответа: ' + e.message); return; }
+    try { resp = JSON.parse(AppBridge.httpGet(updateUrl(url))); } catch (e) { updStatus('Ошибка ответа: ' + e.message); return; }
     if (!resp || !resp.ok) { updStatus('Не удалось скачать update.json: ' + (resp && resp.error ? resp.error : '?')); return; }
     var man;
     try { man = JSON.parse(resp.body); } catch (e2) { updStatus('Файл update.json не разбирается'); return; }
-    if (!man || !man.build || !man.url) { updStatus('В update.json нет полей build или url'); return; }
-    if (man.build <= APP_BUILD) { updStatus('Установлена актуальная версия (сборка ' + APP_BUILD + ')'); return; }
+    var remoteBuild = Number(man && man.build);
+    var currentBuild = Number(load('cc_app_build', APP_BUILD));
+    if (!Number.isSafeInteger(remoteBuild) || remoteBuild < 1 || !man.url || typeof man.url !== 'string') {
+      updStatus('В update.json указаны некорректные поля build или url'); return;
+    }
+    if (!/^https?:\/\//i.test(man.url)) { updStatus('Ссылка на обновление должна начинаться с http:// или https://'); return; }
+    if (remoteBuild <= currentBuild) { updStatus('Установлена актуальная версия (сборка ' + currentBuild + ')'); return; }
     updStatus('Скачиваю версию ' + (man.version || man.build) + '…');
     var resp2;
-    try { resp2 = JSON.parse(AppBridge.httpGet(man.url)); } catch (e3) { updStatus('Ошибка скачивания: ' + e3.message); return; }
+    try { resp2 = JSON.parse(AppBridge.httpGet(updateUrl(man.url))); } catch (e3) { updStatus('Ошибка скачивания: ' + e3.message); return; }
     if (!resp2 || !resp2.ok) { updStatus('Не удалось скачать файл: ' + (resp2 && resp2.error ? resp2.error : '?')); return; }
     var html = resp2.body;
-    if (!html || html.length < 100000 || html.indexOf('kbju-calculator') < 0) { updStatus('Файл не похож на обновление этого приложения'); return; }
+    var expectedBuild = 'var APP_BUILD = ' + remoteBuild + ';';
+    if (!html || html.length < 100000 || html.indexOf('kbju-calculator') < 0 ||
+        html.indexOf(expectedBuild) < 0 || html.indexOf('</html>') < 0) {
+      updStatus('Файл не похож на сборку ' + remoteBuild + ' этого приложения'); return;
+    }
     var sr;
     try { sr = JSON.parse(AppBridge.saveUpdate(html)); } catch (e4) { updStatus('Ошибка сохранения: ' + e4.message); return; }
     if (!sr || !sr.ok) { updStatus('Ошибка сохранения: ' + (sr && sr.error ? sr.error : '?')); return; }
-    save('cc_app_build', man.build);
+    save('cc_app_build', remoteBuild);
     updStatus('Установлено. Перезагружаю…');
-    snackbar('Приложение обновлено до сборки ' + man.build);
+    snackbar('Приложение обновлено до сборки ' + remoteBuild);
     setTimeout(function () { AppBridge.restart(); }, 900);
   }, 30);
 }
@@ -983,7 +1000,7 @@ def main(build=None, version=None, out=None):
     ver = version or APP_VERSION
     bl = build if build is not None else APP_BUILD
     rows = []
-    with open("products.csv", encoding="utf-8-sig", newline="") as f:
+    with (ROOT / "products.csv").open(encoding="utf-8-sig", newline="") as f:
         for r in csv.DictReader(f, delimiter=";"):
             rows.append([
                 r["name"],
@@ -997,9 +1014,15 @@ def main(build=None, version=None, out=None):
     html = html.replace("__APP_VERSION__", ver)
     html = html.replace("__APP_BUILD__", str(bl))
     html = html.replace("__UPDATE_URL__", DEFAULT_UPDATE_URL)
-    target = out or OUT_HTML
-    with open(target, "w", encoding="utf-8") as f:
-        f.write(html)
+    target = Path(out).expanduser().resolve() if out else OUT_HTML
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name(target.name + ".tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as f:
+            f.write(html)
+        os.replace(temporary, target)
+    finally:
+        temporary.unlink(missing_ok=True)
     print(f"{target}: {len(rows)} продуктов, {len(html.encode('utf-8')) / 1024:.0f} КБ, версия {ver} (сборка {bl})")
 
 

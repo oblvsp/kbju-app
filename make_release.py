@@ -1,7 +1,6 @@
 import argparse
 import json
-import os
-import shutil
+from pathlib import Path
 
 import build_app
 
@@ -14,12 +13,10 @@ def main():
     parser.add_argument("--notes", default="", help="описание изменений")
     args = parser.parse_args()
 
-    build_app.main(build=args.build, version=args.version or build_app.APP_VERSION)
-
-    dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
-    os.makedirs(dist, exist_ok=True)
-    shutil.copy2(os.path.join(os.path.dirname(os.path.abspath(__file__)), "calorie_app.html"),
-                 os.path.join(dist, "kbju-index.html"))
+    dist = Path(__file__).resolve().parent / "dist"
+    dist.mkdir(parents=True, exist_ok=True)
+    html_path = dist / "kbju-index.html"
+    build_app.main(build=args.build, version=args.version or build_app.APP_VERSION, out=html_path)
 
     base = args.base.rstrip("/")
     manifest = {
@@ -28,11 +25,13 @@ def main():
         "notes": args.notes,
         "url": base + "/kbju-index.html",
     }
-    with open(os.path.join(dist, "update.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    (dist / "update.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
-    size = os.path.getsize(os.path.join(dist, "kbju-index.html")) // 1024
-    print(f"готово: {dist}/update.json и {dist}/kbju-index.html ({size} КБ)")
+    size = html_path.stat().st_size // 1024
+    print(f"готово: {dist}/update.json и {html_path} ({size} КБ)")
     print(f"адрес обновления для приложения: {base}/update.json")
 
 
