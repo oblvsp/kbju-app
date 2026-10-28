@@ -1,0 +1,6 @@
+{
+  "version": "1.5",
+  "build": 11,
+  "notes": "Исправлена публикация обновлений и обход кэша GitHub",
+  "url": "https://raw.githubusercontent.com/oblvsp/kbju-app/main/kbju-index.html"
+}
