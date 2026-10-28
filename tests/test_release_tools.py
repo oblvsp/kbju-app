@@ -31,7 +31,10 @@ class BuildAppTests(unittest.TestCase):
             self.assertNotIn("function diaryCountWord(count)", html)
             self.assertIn("('0' + date.getDate()).slice(-2) + '.'", html)
             self.assertIn("('0' + (date.getMonth() + 1)).slice(-2) + '.' + date.getFullYear()", html)
-            self.assertIn("ul.entries .body{flex:1;min-width:0;text-align:center", html)
+            self.assertIn("ul.entries .day-title{display:flex;flex:1;align-items:center;justify-content:space-between;gap:12px;min-width:0}", html)
+            self.assertIn("ul.entries .day-date{flex:none;margin:0 4px 0 auto", html)
+            self.assertIn("ul.entries .body{flex:1;min-width:0;text-align:left;padding:0 48px 0 16px}", html)
+            self.assertIn("ul.entries .l1{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:10px}", html)
             self.assertIn("var expectedBuild = 'var APP_BUILD = ' + remoteBuild", html)
             self.assertNotIn("__DATA__", html)
 

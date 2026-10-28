@@ -105,9 +105,9 @@ ul.entries li:first-child{border-top:none}
 ul.entries li.diary-day{border:0;margin:12px 0 4px}
 ul.entries li.diary-day:first-child{margin-top:6px}
 ul.entries .day-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--outline-variant);border-radius:14px;background:var(--surface-container);color:var(--on-surface);text-align:left;font:inherit;cursor:pointer}
-ul.entries .day-title{flex:1;min-width:0}
-ul.entries .day-weekday{font-size:14px;font-weight:600;text-transform:capitalize}
-ul.entries .day-date{font-size:12px;color:var(--on-surface-variant);margin-top:2px}
+ul.entries .day-title{display:flex;flex:1;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+ul.entries .day-weekday{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;text-transform:capitalize}
+ul.entries .day-date{flex:none;margin:0 4px 0 auto;white-space:nowrap;font-size:12px;color:var(--on-surface-variant)}
 ul.entries .day-chevron{width:24px;height:24px;display:grid;place-items:center;transition:transform .16s ease}
 ul.entries .day-chevron svg{width:20px;height:20px;fill:currentColor}
 ul.entries .day-toggle[aria-expanded="false"] .day-chevron{transform:rotate(-90deg)}
@@ -115,10 +115,10 @@ ul.entries .sw-bg{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;a
 ul.entries .sw-bg.del{justify-content:flex-start;padding-left:18px;background:var(--error-container);color:var(--on-error-container)}
 ul.entries .sw-bg.edit{justify-content:flex-end;padding-right:18px;background:var(--primary-container);color:var(--on-primary-container)}
 ul.entries .sw-card{position:relative;display:flex;justify-content:center;align-items:center;padding:10px 0;background:var(--surface-container-low);border-radius:12px;touch-action:pan-y;will-change:transform}
-ul.entries .body{flex:1;min-width:0;text-align:center;padding:0 42px}
-ul.entries .l1{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}
-ul.entries .l1 .n{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-ul.entries .l1 .w{font-size:12px;color:var(--on-surface-variant);white-space:nowrap}
+ul.entries .body{flex:1;min-width:0;text-align:left;padding:0 48px 0 16px}
+ul.entries .l1{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:10px}
+ul.entries .l1 .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.entries .l1 .w{flex:none;font-size:12px;color:var(--on-surface-variant);white-space:nowrap}
 ul.entries .l2{font-size:12.5px;color:var(--on-surface-variant);margin-top:3px;font-variant-numeric:tabular-nums;text-align:center}
 .sw-card .iconbtn.x{position:absolute;right:4px;top:50%;transform:translateY(-50%)}
 .iconbtn{width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:var(--on-surface-variant);font-size:20px;cursor:pointer;line-height:1;flex:none}
