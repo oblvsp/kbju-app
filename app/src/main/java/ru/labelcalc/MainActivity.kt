@@ -3,15 +3,16 @@ package ru.labelcalc
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.BottomNavigation
-import androidx.compose.material3.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.DateRange
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -34,15 +35,15 @@ class MainActivity : ComponentActivity() {
             CalcTheme {
                 val nav = rememberNavController()
                 val items = listOf(
-                    Triple(Routes.DISHES, "Блюда", Icons.Default.List),
-                    Triple(Routes.DIARY, "Дневник", Icons.Default.CalendarToday)
+                    Triple(Routes.DISHES, "Блюда", Icons.AutoMirrored.Filled.List),
+                    Triple(Routes.DIARY, "Дневник", Icons.Default.DateRange)
                 )
                 Scaffold(
                     bottomBar = {
-                        BottomNavigation {
+                        NavigationBar {
                             val current = nav.currentBackStackEntry?.destination?.route
                             items.forEach { (route, label, icon) ->
-                                BottomNavigationItem(
+                                NavigationBarItem(
                                     icon = { Icon(icon, contentDescription = null) },
                                     label = { Text(label) },
                                     selected = current == route,

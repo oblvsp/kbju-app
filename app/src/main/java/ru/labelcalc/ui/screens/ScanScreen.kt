@@ -3,6 +3,7 @@ package ru.labelcalc.ui.screens
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -35,9 +36,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.suspendCancellableCoroutine
 import ru.labelcalc.logic.NutritionParser
 import ru.labelcalc.ui.ProductPrefill
 import ru.labelcalc.ui.ScreenBar
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.math.roundToInt
 
 /**
@@ -146,7 +150,19 @@ private fun CameraPreview(modifier: Modifier = Modifier) {
     val previewView = remember { PreviewView(context) }
     val providerFuture = remember { ProcessCameraProvider.getInstance(context) }
     LaunchedEffect(Unit) {
-        val provider = providerFuture.await()
+        val provider = suspendCancellableCoroutine<ProcessCameraProvider> { continuation ->
+            providerFuture.addListener(
+                {
+                    try {
+                        val cameraProvider = providerFuture.get()
+                        if (continuation.isActive) continuation.resume(cameraProvider)
+                    } catch (error: Exception) {
+                        if (continuation.isActive) continuation.resumeWithException(error)
+                    }
+                },
+                ContextCompat.getMainExecutor(context)
+            )
+        }
         val preview = Preview.Builder().build().also {
             it.setSurfaceProvider(previewView.surfaceProvider)
         }
@@ -158,7 +174,12 @@ private fun CameraPreview(modifier: Modifier = Modifier) {
         )
     }
     DisposableEffect(providerFuture) {
-        onDispose { providerFuture.get().unbindAll() }
+        onDispose {
+            providerFuture.addListener(
+                { runCatching { providerFuture.get().unbindAll() } },
+                ContextCompat.getMainExecutor(context)
+            )
+        }
     }
     AndroidView(factory = { previewView }, modifier = modifier)
 }
