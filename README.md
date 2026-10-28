@@ -87,7 +87,7 @@ GITHUB_TOKEN=... python3 publish_github.py --notes "Описание измен�
 python3 publish_github.py --no-push
 ```
 
-Манифест проекта: [`update.json`](https://raw.githubusercontent.com/oblvsp/kbju-app/main/update.json). HTML-клиент добавляет к запросам параметр времени, чтобы избежать устаревшего кэша GitHub, и проверяет совпадение сборки перед установкой.
+Манифест проекта: [`update.json`](https://raw.githubusercontent.com/oblvsp/kbju-app/refs/heads/main/update.json). HTML-клиент добавляет к запросам параметр времени, чтобы избежать устаревшего кэша GitHub, и проверяет совпадение сборки перед установкой.
 
 **Важно:** HTML-обновление работает только внутри Android-контейнера с JavaScript-мостом `AppBridge` (`httpGet`, `saveUpdate`, `restart`). Этот мост не входит в репозиторий. Обновлятор HTML-версии не устанавливает и не обновляет APK нативного приложения.
 

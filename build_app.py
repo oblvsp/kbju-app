@@ -5,7 +5,7 @@ from pathlib import Path
 
 APP_VERSION = "1.5"
 APP_BUILD = 4
-DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/oblvsp/kbju-app/main/update.json"
+DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/oblvsp/kbju-app/refs/heads/main/update.json"
 ROOT = Path(__file__).resolve().parent
 OUT_HTML = ROOT / "calorie_app.html"
 
