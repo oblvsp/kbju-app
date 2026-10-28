@@ -123,7 +123,7 @@ def main():
     DIST.mkdir(parents=True, exist_ok=True)
     html_path = DIST / "kbju-index.html"
     build_app.main(build=new_build, version=version, out=html_path)
-    base = f"https://raw.githubusercontent.com/{repo}/refs/heads/{branch}"
+    base = f"https://raw.githubusercontent.com/{repo}/{branch}"
     manifest = {
         "version": version,
         "build": new_build,

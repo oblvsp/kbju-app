@@ -25,7 +25,7 @@ class BuildAppTests(unittest.TestCase):
             self.assertIn("var APP_BUILD = 17;", html)
             self.assertIn("function updateUrl(url)", html)
             self.assertIn("_kbju_ts=", html)
-            self.assertIn("/refs/heads/main/update.json", html)
+            self.assertIn("raw.githubusercontent.com/oblvsp/kbju-app/main/update.json", html)
             self.assertIn("var expectedBuild = 'var APP_BUILD = ' + remoteBuild", html)
             self.assertNotIn("__DATA__", html)
 
