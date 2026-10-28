@@ -27,6 +27,9 @@ class BuildAppTests(unittest.TestCase):
             self.assertIn("function parseUpdateManifest(body)", html)
             self.assertIn("_kbju_ts=", html)
             self.assertIn("api.github.com/repos/oblvsp/kbju-app/contents/update.json?ref=main", html)
+            self.assertIn("function diaryCountWord(count)", html)
+            self.assertIn("dateParts.day + ' - ' + dateParts.month + ' - ' + dateParts.year", html)
+            self.assertIn("ul.entries .body{flex:1;min-width:0;text-align:center", html)
             self.assertIn("var expectedBuild = 'var APP_BUILD = ' + remoteBuild", html)
             self.assertNotIn("__DATA__", html)
 

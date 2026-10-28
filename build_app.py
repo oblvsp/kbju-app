@@ -102,14 +102,26 @@ input:focus,select:focus{outline:2px solid var(--primary)}
 ul.entries{list-style:none;margin:10px 0 0;padding:0;-webkit-user-select:none;user-select:none}
 ul.entries li{position:relative;overflow:hidden;border-top:1px solid var(--outline-variant);border-radius:12px}
 ul.entries li:first-child{border-top:none}
+ul.entries li.diary-day{border:0;margin:12px 0 4px}
+ul.entries li.diary-day:first-child{margin-top:6px}
+ul.entries .day-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--outline-variant);border-radius:14px;background:var(--surface-container);color:var(--on-surface);text-align:left;font:inherit;cursor:pointer}
+ul.entries .day-title{flex:1;min-width:0}
+ul.entries .day-weekday{font-size:14px;font-weight:600;text-transform:capitalize}
+ul.entries .day-date{font-size:12px;color:var(--on-surface-variant);margin-top:2px}
+ul.entries .day-count{font-size:12px;color:var(--on-surface-variant);white-space:nowrap}
+ul.entries .day-chevron{width:24px;height:24px;display:grid;place-items:center;transition:transform .16s ease}
+ul.entries .day-chevron svg{width:20px;height:20px;fill:currentColor}
+ul.entries .day-toggle[aria-expanded="false"] .day-chevron{transform:rotate(-90deg)}
 ul.entries .sw-bg{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;align-items:center;font-size:13px;font-weight:500;opacity:0;transition:opacity .1s}
 ul.entries .sw-bg.del{justify-content:flex-start;padding-left:18px;background:var(--error-container);color:var(--on-error-container)}
 ul.entries .sw-bg.edit{justify-content:flex-end;padding-right:18px;background:var(--primary-container);color:var(--on-primary-container)}
-ul.entries .sw-card{position:relative;display:flex;gap:6px;align-items:center;padding:10px 0;background:var(--surface-container-low);border-radius:12px;touch-action:pan-y;will-change:transform}
-ul.entries .body{flex:1;min-width:0}
-ul.entries .l1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+ul.entries .sw-card{position:relative;display:flex;justify-content:center;align-items:center;padding:10px 0;background:var(--surface-container-low);border-radius:12px;touch-action:pan-y;will-change:transform}
+ul.entries .body{flex:1;min-width:0;text-align:center;padding:0 42px}
+ul.entries .l1{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}
+ul.entries .l1 .n{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 ul.entries .l1 .w{font-size:12px;color:var(--on-surface-variant);white-space:nowrap}
-ul.entries .l2{font-size:12.5px;color:var(--on-surface-variant);margin-top:3px;font-variant-numeric:tabular-nums}
+ul.entries .l2{font-size:12.5px;color:var(--on-surface-variant);margin-top:3px;font-variant-numeric:tabular-nums;text-align:center}
+.sw-card .iconbtn.x{position:absolute;right:4px;top:50%;transform:translateY(-50%)}
 .iconbtn{width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:var(--on-surface-variant);font-size:20px;cursor:pointer;line-height:1;flex:none}
 .iconbtn:hover{background:var(--surface-container)}
 .chart{margin-top:10px}
@@ -317,6 +329,7 @@ if (!Element.prototype.closest) {
 }
 
 var entries = load('cc_entries', []);
+var diaryCollapsed = load('cc_diary_collapsed', {});
 var custom = load('cc_custom', []);
 var sel = null;
 var sugList = [];
@@ -450,28 +463,59 @@ function renderAll() {
 function renderDiary() {
   var ul = $('entryList');
   ul.innerHTML = '';
-  var order = [];
-  for (var i = 0; i < entries.length; i++) order.push(i);
-  order.sort(function (a, b) {
-    var da = entries[a].d || '', db = entries[b].d || '';
-    if (da === db) return 0;
-    return da < db ? 1 : -1;
-  });
-  var today = todayISO();
-  for (var j = 0; j < order.length; j++) {
-    var e = entries[order[j]];
-    var li = document.createElement('li');
-    var dateTag = (e.d && e.d !== today) ? ' · ' + e.d.slice(8, 10) + '.' + e.d.slice(5, 7) : '';
-    li.innerHTML = '<div class="sw-bg edit">Изменить</div><div class="sw-bg del">Удалить</div>' +
-      '<div class="sw-card"><div class="body">' +
-      '<div class="l1"><span class="n">' + esc(e.name) + '</span><span class="w">' + e.g + ' г' + dateTag + '</span></div>' +
-      '<div class="l2">' + Math.round(e.k) + ' ккал · Б ' + r1(e.p) + ' · Ж ' + r1(e.f) + ' · У ' + r1(e.c) + '</div>' +
-      '</div><button class="x iconbtn" data-i="' + order[j] + '" title="Удалить">×</button></div>';
-    ul.appendChild(li);
+  var groups = Object.create(null);
+  for (var i = 0; i < entries.length; i++) {
+    var day = entries[i].d || todayISO();
+    if (!groups[day]) groups[day] = [];
+    groups[day].push(i);
+  }
+  var days = Object.keys(groups).sort(function (a, b) { return a < b ? 1 : a > b ? -1 : 0; });
+  var weekdayFormat = new Intl.DateTimeFormat('ru-RU', { weekday: 'long' });
+  var dateFormat = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  for (var j = 0; j < days.length; j++) {
+    var dayKey = days[j];
+    var parts = dayKey.split('-');
+    var date = new Date(+parts[0], (+parts[1] || 1) - 1, +parts[2] || 1, 12);
+    var weekday = weekdayFormat.format(date);
+    weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    var formattedParts = dateFormat.formatToParts(date), dateParts = {};
+    for (var p = 0; p < formattedParts.length; p++) dateParts[formattedParts[p].type] = formattedParts[p].value;
+    var dateLabel = dateParts.day + ' - ' + dateParts.month + ' - ' + dateParts.year;
+    var hasSavedState = Object.prototype.hasOwnProperty.call(diaryCollapsed, dayKey);
+    var expanded = hasSavedState ? !diaryCollapsed[dayKey] : j === 0;
+    var dayHeader = document.createElement('li');
+    dayHeader.className = 'diary-day';
+    dayHeader.innerHTML = '<button type="button" class="day-toggle" data-day="' + dayKey + '" aria-expanded="' + expanded + '">' +
+      '<span class="day-title"><span class="day-weekday">' + weekday + '</span><span class="day-date">' + dateLabel + '</span></span>' +
+      '<span class="day-count">' + groups[dayKey].length + ' ' + diaryCountWord(groups[dayKey].length) + '</span>' +
+      '<span class="day-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></span>' +
+      '</button>';
+    ul.appendChild(dayHeader);
+    if (!expanded) continue;
+    for (var k = 0; k < groups[dayKey].length; k++) {
+      var entryIndex = groups[dayKey][k];
+      var e = entries[entryIndex];
+      var li = document.createElement('li');
+      li.innerHTML = '<div class="sw-bg edit">Изменить</div><div class="sw-bg del">Удалить</div>' +
+        '<div class="sw-card"><div class="body">' +
+        '<div class="l1"><span class="n">' + esc(e.name) + '</span><span class="w">' + e.g + ' г</span></div>' +
+        '<div class="l2">' + Math.round(e.k) + ' ккал · Б ' + r1(e.p) + ' · Ж ' + r1(e.f) + ' · У ' + r1(e.c) + '</div>' +
+        '</div><button class="x iconbtn" data-i="' + entryIndex + '" title="Удалить" aria-label="Удалить запись">×</button></div>';
+      ul.appendChild(li);
+    }
   }
   $('emptyDiary').style.display = entries.length ? 'none' : 'block';
   $('diaryCount').textContent = entries.length ? 'Записей: ' + entries.length : '';
   save('cc_entries', entries);
+}
+
+function diaryCountWord(count) {
+  var lastTwo = count % 100;
+  var last = count % 10;
+  if (lastTwo >= 11 && lastTwo <= 14) return 'записей';
+  if (last === 1) return 'запись';
+  if (last >= 2 && last <= 4) return 'записи';
+  return 'записей';
 }
 
 function mondayOf(d) {
@@ -851,6 +895,14 @@ $('cancelSel').addEventListener('click', resetEditor);
 $('addManual').addEventListener('click', addManual);
 $('manualCard').addEventListener('input', updateManualPreview);
 $('entryList').addEventListener('click', function (e) {
+  var toggle = e.target.closest ? e.target.closest('button.day-toggle') : null;
+  if (toggle) {
+    var day = toggle.getAttribute('data-day');
+    diaryCollapsed[day] = toggle.getAttribute('aria-expanded') === 'true';
+    save('cc_diary_collapsed', diaryCollapsed);
+    renderDiary();
+    return;
+  }
   var b = e.target.closest ? e.target.closest('button.x') : null;
   if (b) { entries.splice(+b.getAttribute('data-i'), 1); save('cc_entries', entries); renderAll(); }
 });
