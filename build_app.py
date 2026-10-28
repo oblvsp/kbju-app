@@ -5,7 +5,7 @@ from pathlib import Path
 
 APP_VERSION = "1.5"
 APP_BUILD = 4
-DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/oblvsp/kbju-app/main/update.json"
+DEFAULT_UPDATE_URL = "https://api.github.com/repos/oblvsp/kbju-app/contents/update.json?ref=main"
 ROOT = Path(__file__).resolve().parent
 OUT_HTML = ROOT / "calorie_app.html"
 
@@ -664,6 +664,19 @@ function updateUrl(url) {
   return url + separator + '_kbju_ts=' + Date.now();
 }
 
+function parseUpdateManifest(body) {
+  var payload = JSON.parse(body);
+  if (payload && payload.encoding === 'base64' && payload.content) {
+    var binary = atob(payload.content.replace(/\s/g, ''));
+    var encoded = '';
+    for (var i = 0; i < binary.length; i++) {
+      encoded += '%' + ('0' + binary.charCodeAt(i).toString(16)).slice(-2);
+    }
+    payload = JSON.parse(decodeURIComponent(encoded));
+  }
+  return payload;
+}
+
 function updStatus(msg) { $('upd_status').textContent = msg; }
 
 function syncUpdateUi() {
@@ -685,7 +698,7 @@ function doUpdate() {
     try { resp = JSON.parse(AppBridge.httpGet(updateUrl(url))); } catch (e) { updStatus('Ошибка ответа: ' + e.message); return; }
     if (!resp || !resp.ok) { updStatus('Не удалось скачать update.json: ' + (resp && resp.error ? resp.error : '?')); return; }
     var man;
-    try { man = JSON.parse(resp.body); } catch (e2) { updStatus('Файл update.json не разбирается'); return; }
+    try { man = parseUpdateManifest(resp.body); } catch (e2) { updStatus('Ответ GitHub не содержит корректный update.json'); return; }
     var remoteBuild = Number(man && man.build);
     var currentBuild = Number(load('cc_app_build', APP_BUILD));
     if (!Number.isSafeInteger(remoteBuild) || remoteBuild < 1 || !man.url || typeof man.url !== 'string') {

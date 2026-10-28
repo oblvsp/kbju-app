@@ -86,6 +86,20 @@ def published_build(fallback):
     return max(fallback, build)
 
 
+def commit_staged(message, env):
+    result = subprocess.run(
+        ["git", "commit", "-m", message],
+        cwd=WORK,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    if result.returncode:
+        print(result.stdout, result.stderr)
+        raise SystemExit("git commit не удался")
+    return run(["git", "rev-parse", "HEAD"], cwd=WORK, capture=True, env=env)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Собирает и публикует HTML-релиз в GitHub")
     parser.add_argument("--build", type=int, default=None, help="номер сборки (по умолчанию: последняя + 1)")
@@ -123,33 +137,26 @@ def main():
     DIST.mkdir(parents=True, exist_ok=True)
     html_path = DIST / "kbju-index.html"
     build_app.main(build=new_build, version=version, out=html_path)
-    base = f"https://raw.githubusercontent.com/{repo}/{branch}"
-    manifest = {
-        "version": version,
-        "build": new_build,
-        "notes": notes,
-        "url": base + "/kbju-index.html",
-    }
-    save_json(DIST / "update.json", manifest)
+    raw_base = f"https://raw.githubusercontent.com/{repo}"
+    manifest_url = f"https://api.github.com/repos/{repo}/contents/update.json?ref={branch}"
 
     run(["git", "config", "user.name", cfg.get("git_name", "kbju-release-bot")], cwd=WORK, env=env)
     run(["git", "config", "user.email", cfg.get("git_email", "kbju-release@local")], cwd=WORK, env=env)
 
     shutil.copy2(html_path, WORK / "kbju-index.html")
+    run(["git", "add", "--", "kbju-index.html"], cwd=WORK, env=env)
+    html_commit = commit_staged(f"release {version}: build {new_build} HTML", env)
+
+    manifest = {
+        "version": version,
+        "build": new_build,
+        "notes": notes,
+        "url": f"{raw_base}/{html_commit}/kbju-index.html",
+    }
+    save_json(DIST / "update.json", manifest)
     save_json(WORK / "update.json", manifest)
-    run(["git", "add", "--", "kbju-index.html", "update.json"], cwd=WORK, env=env)
-    commit = subprocess.run(
-        ["git", "commit", "-m", f"release {version}: build {new_build}"],
-        cwd=WORK,
-        capture_output=True,
-        text=True,
-        env=env,
-    )
-    if commit.returncode:
-        if "nothing to commit" not in (commit.stdout + commit.stderr):
-            print(commit.stdout, commit.stderr)
-            raise SystemExit("git commit не удался")
-        raise SystemExit("Релиз совпадает с уже опубликованными файлами; номер сборки не изменён")
+    run(["git", "add", "--", "update.json"], cwd=WORK, env=env)
+    release_sha = commit_staged(f"release {version}: build {new_build} manifest", env)
     print(f"commit: build {new_build}", flush=True)
 
     if args.no_push:
@@ -157,7 +164,7 @@ def main():
         return
 
     run(["git", "push", "origin", f"HEAD:{branch}"], cwd=WORK, env=env)
-    local_sha = run(["git", "rev-parse", "HEAD"], cwd=WORK, capture=True, env=env)
+    local_sha = release_sha
     remote_sha = run(["git", "ls-remote", "origin", f"refs/heads/{branch}"], cwd=WORK, capture=True, env=env)
     if not remote_sha or remote_sha.split()[0] != local_sha:
         raise SystemExit("Проверка публикации не пройдена: SHA удалённой ветки не совпадает с коммитом релиза")
@@ -165,7 +172,7 @@ def main():
     cfg["last_build"] = new_build
     save_json(CONFIG, cfg)
     print(f"опубликовано: сборка {new_build} ({local_sha[:7]})")
-    print("адрес обновления для приложения: " + base + "/update.json")
+    print("адрес обновления для приложения: " + manifest_url)
 
 
 if __name__ == "__main__":
