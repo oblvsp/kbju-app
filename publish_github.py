@@ -43,12 +43,12 @@ def main():
     last = int(cfg.get("last_build", build_app.APP_BUILD))
     new_build = args.build if args.build is not None else last + 1
     version = args.version or build_app.APP_VERSION
-    build_app.main(build=new_build, version=version)
     notes = args.notes if args.notes is not None else cfg.get("notes", "")
 
     dist = os.path.join(ROOT, "dist")
     os.makedirs(dist, exist_ok=True)
-    shutil.copy2(os.path.join(ROOT, "calorie_app.html"), os.path.join(dist, "kbju-index.html"))
+    # Собираем свежий HTML сразу в dist (единый источник — products.csv + шаблон build_app).
+    build_app.main(build=new_build, version=version, out=os.path.join(dist, "kbju-index.html"))
     base = "https://raw.githubusercontent.com/" + repo + "/main"
     manifest = {"version": version, "build": new_build, "notes": notes, "url": base + "/kbju-index.html"}
     with open(os.path.join(dist, "update.json"), "w", encoding="utf-8") as f:

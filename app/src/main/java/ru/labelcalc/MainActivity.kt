@@ -19,7 +19,6 @@ import ru.labelcalc.data.AppDatabase
 import ru.labelcalc.ui.CalcTheme
 import ru.labelcalc.ui.ProductPrefill
 import ru.labelcalc.ui.Routes
-import ru.labelcalc.ui.ScanCache
 import ru.labelcalc.ui.screens.DishListScreen
 import ru.labelcalc.ui.screens.DishScreen
 import ru.labelcalc.ui.screens.PickProductScreen
@@ -81,7 +80,6 @@ class MainActivity : ComponentActivity() {
                                 onScan = { nav.navigate(Routes.scan(dishId)) },
                                 onPick = { nav.navigate(Routes.pick(dishId)) },
                                 onAddManually = {
-                                    ScanCache.rawText = ""
                                     nav.navigate(Routes.product(dishId, ProductPrefill()))
                                 }
                             )
@@ -106,7 +104,6 @@ class MainActivity : ComponentActivity() {
                                 db = db,
                                 onBack = { nav.popBackStack() },
                                 onPicked = { product ->
-                                    ScanCache.rawText = ""
                                     nav.navigate(
                                         Routes.product(
                                             dishId,

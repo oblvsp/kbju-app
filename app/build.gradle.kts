@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -63,7 +63,6 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.exifinterface)
-    // tesseract4android removed – OCR functionality was deprecated.
 
     testImplementation(libs.junit)
     debugImplementation(libs.androidx.compose.ui.tooling)

@@ -13,11 +13,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +31,6 @@ import ru.labelcalc.data.DishItemEntity
 import ru.labelcalc.data.ProductEntity
 import ru.labelcalc.logic.CalorieMath
 import ru.labelcalc.ui.ProductPrefill
-import ru.labelcalc.ui.ScanCache
 import ru.labelcalc.ui.ScreenBar
 
 private fun parseNum(s: String): Double? =
@@ -54,7 +51,6 @@ fun ProductScreen(
     var fat by remember { mutableStateOf(prefill.fat?.let(CalorieMath::format) ?: "") }
     var carbs by remember { mutableStateOf(prefill.carbs?.let(CalorieMath::format) ?: "") }
     var kcal by remember { mutableStateOf(prefill.kcal?.let(CalorieMath::format) ?: "") }
-    var showRaw by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val p = parseNum(protein)
@@ -169,27 +165,6 @@ fun ProductScreen(
                     "Расчёт по БЖУ: ≈ ${CalorieMath.format(suggestKcal)} ккал на 100 г",
                     style = MaterialTheme.typography.bodySmall
                 )
-            }
-            if (ScanCache.rawText.isNotBlank()) {
-                OutlinedCard {
-                    Column(Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
-                        TextButton(onClick = { showRaw = !showRaw }) {
-                            Text(
-                                if (showRaw) "Скрыть распознанный текст"
-                                else "Показать распознанный текст"
-                            )
-                        }
-                        if (showRaw) {
-                            Text(
-                                ScanCache.rawText,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier
-                                    .heightIn(max = 220.dp)
-                                    .verticalScroll(rememberScrollState())
-                            )
-                        }
-                    }
-                }
             }
             error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

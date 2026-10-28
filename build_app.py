@@ -4,6 +4,7 @@ import json
 APP_VERSION = "1.5"
 APP_BUILD = 4
 DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/oblvsp/kbju-app/main/update.json"
+OUT_HTML = "calorie_app.html"
 
 TEMPLATE = r"""<!DOCTYPE html>
 <html lang="ru">
@@ -978,7 +979,7 @@ $('editSave').addEventListener('click', function () {
 """
 
 
-def main(build=None, version=None):
+def main(build=None, version=None, out=None):
     ver = version or APP_VERSION
     bl = build if build is not None else APP_BUILD
     rows = []
@@ -996,10 +997,17 @@ def main(build=None, version=None):
     html = html.replace("__APP_VERSION__", ver)
     html = html.replace("__APP_BUILD__", str(bl))
     html = html.replace("__UPDATE_URL__", DEFAULT_UPDATE_URL)
-    with open("calorie_app.html", "w", encoding="utf-8") as f:
+    target = out or OUT_HTML
+    with open(target, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"calorie_app.html: {len(rows)} продуктов, {len(html.encode('utf-8')) / 1024:.0f} КБ, версия {ver} (сборка {bl})")
+    print(f"{target}: {len(rows)} продуктов, {len(html.encode('utf-8')) / 1024:.0f} КБ, версия {ver} (сборка {bl})")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description="Собрать автономный HTML-калькулятор КБЖУ")
+    parser.add_argument("--build", type=int, default=None)
+    parser.add_argument("--version", default=None)
+    parser.add_argument("--out", default=None, help=f"куда записать HTML (по умолчанию {OUT_HTML})")
+    args = parser.parse_args()
+    main(build=args.build, version=args.version, out=args.out)

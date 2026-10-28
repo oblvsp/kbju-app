@@ -3,7 +3,7 @@ package ru.labelcalc
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import ru.labelcalc.ocr.NutritionParser
+import ru.labelcalc.logic.NutritionParser
 
 class NutritionParserTest {
 
