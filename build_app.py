@@ -108,7 +108,6 @@ ul.entries .day-toggle{width:100%;display:flex;align-items:center;gap:12px;paddi
 ul.entries .day-title{flex:1;min-width:0}
 ul.entries .day-weekday{font-size:14px;font-weight:600;text-transform:capitalize}
 ul.entries .day-date{font-size:12px;color:var(--on-surface-variant);margin-top:2px}
-ul.entries .day-count{font-size:12px;color:var(--on-surface-variant);white-space:nowrap}
 ul.entries .day-chevron{width:24px;height:24px;display:grid;place-items:center;transition:transform .16s ease}
 ul.entries .day-chevron svg{width:20px;height:20px;fill:currentColor}
 ul.entries .day-toggle[aria-expanded="false"] .day-chevron{transform:rotate(-90deg)}
@@ -471,23 +470,20 @@ function renderDiary() {
   }
   var days = Object.keys(groups).sort(function (a, b) { return a < b ? 1 : a > b ? -1 : 0; });
   var weekdayFormat = new Intl.DateTimeFormat('ru-RU', { weekday: 'long' });
-  var dateFormat = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
   for (var j = 0; j < days.length; j++) {
     var dayKey = days[j];
     var parts = dayKey.split('-');
     var date = new Date(+parts[0], (+parts[1] || 1) - 1, +parts[2] || 1, 12);
     var weekday = weekdayFormat.format(date);
     weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-    var formattedParts = dateFormat.formatToParts(date), dateParts = {};
-    for (var p = 0; p < formattedParts.length; p++) dateParts[formattedParts[p].type] = formattedParts[p].value;
-    var dateLabel = dateParts.day + ' - ' + dateParts.month + ' - ' + dateParts.year;
+    var dateLabel = ('0' + date.getDate()).slice(-2) + '.' +
+      ('0' + (date.getMonth() + 1)).slice(-2) + '.' + date.getFullYear();
     var hasSavedState = Object.prototype.hasOwnProperty.call(diaryCollapsed, dayKey);
     var expanded = hasSavedState ? !diaryCollapsed[dayKey] : j === 0;
     var dayHeader = document.createElement('li');
     dayHeader.className = 'diary-day';
     dayHeader.innerHTML = '<button type="button" class="day-toggle" data-day="' + dayKey + '" aria-expanded="' + expanded + '">' +
       '<span class="day-title"><span class="day-weekday">' + weekday + '</span><span class="day-date">' + dateLabel + '</span></span>' +
-      '<span class="day-count">' + groups[dayKey].length + ' ' + diaryCountWord(groups[dayKey].length) + '</span>' +
       '<span class="day-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg></span>' +
       '</button>';
     ul.appendChild(dayHeader);
@@ -507,15 +503,6 @@ function renderDiary() {
   $('emptyDiary').style.display = entries.length ? 'none' : 'block';
   $('diaryCount').textContent = entries.length ? 'Записей: ' + entries.length : '';
   save('cc_entries', entries);
-}
-
-function diaryCountWord(count) {
-  var lastTwo = count % 100;
-  var last = count % 10;
-  if (lastTwo >= 11 && lastTwo <= 14) return 'записей';
-  if (last === 1) return 'запись';
-  if (last >= 2 && last <= 4) return 'записи';
-  return 'записей';
 }
 
 function mondayOf(d) {
