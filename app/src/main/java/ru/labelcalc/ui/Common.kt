@@ -60,10 +60,6 @@ data class ProductPrefill(
     }
 }
 
-object ScanCache {
-    var rawText: String = ""
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenBar(

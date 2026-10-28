@@ -1,2 +1,2 @@
--keep class com.googlecode.tesseract.android.** { *; }
--keep class com.googlecode.leptonica.android.** { *; }
+# Room сгенерированные классы защищены правилами по умолчанию AGP.
+# OCR-библиотеки (Tesseract) удалены из сборки — правила keep больше не нужны.
