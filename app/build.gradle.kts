@@ -1,9 +1,29 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+val signingPropsFile = rootProject.file("keystore.properties")
+val signingProps = Properties().apply {
+    if (signingPropsFile.exists()) {
+        signingPropsFile.inputStream().use { load(it) }
+    }
+}
+
+val checkSigningProps = tasks.register("checkSigningProps") {
+    doLast {
+        if (!signingPropsFile.exists()) {
+            throw GradleException(
+                "keystore.properties не найден в корне проекта — релизная сборка без подписи недопустима"
+            )
+        }
+    }
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(checkSigningProps) }
 
 android {
     namespace = "ru.labelcalc"
@@ -17,8 +37,20 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        if (signingPropsFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(signingProps.getProperty("storeFile"))
+                storePassword = signingProps.getProperty("storePassword")
+                keyAlias = signingProps.getProperty("keyAlias")
+                keyPassword = signingProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

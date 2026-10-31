@@ -5,11 +5,13 @@ github-update/
 build/
 target/
 .gradle/
+.kotlin/
 local.properties
 *.apk
 *.idsig
 *.keystore
 *.bak
+keystore.properties
 *.tmp
 *.log
 .DS_Store
