@@ -8,6 +8,7 @@ target/
 .kotlin/
 local.properties
 *.apk
+!kbju-app-native-release.apk
 *.idsig
 *.keystore
 *.bak
